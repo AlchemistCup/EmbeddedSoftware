@@ -1,6 +1,7 @@
 import cv2
 from picamera2 import Picamera2
 from pathlib import Path
+from utils import find_starting_id
 
 CALIBRATION_DIR = Path(__file__).parent.resolve() / 'fisheye_calibration'
 
@@ -15,7 +16,7 @@ def main():
     picam2.configure(config)
     picam2.start()
 
-    i = find_starting_id()
+    i = find_starting_id(CALIBRATION_DIR)
     while True:
         im = picam2.capture_array()
         cv2.imshow("Camera", im)
@@ -31,13 +32,6 @@ def main():
         elif keypress != -1:
             print(keypress)
     cv2.destroyAllWindows()
-
-def find_starting_id():
-    starting_id = 0
-    for file in CALIBRATION_DIR.iterdir():
-        curr_id = int(file.stem.split('_')[-1])
-        starting_id = max(starting_id, curr_id)
-    return starting_id + 1
 
 if __name__ == '__main__':
     main()

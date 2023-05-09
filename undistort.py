@@ -7,7 +7,10 @@ import time
 # TODO: Refactor this mess
 # class FishEyeCorrector:
 #     def __init__(self, dim: Tuple[int, int], k: np.array, d: np.array):
-#         self._
+# 
+# Maybe use @cached_property to memoise constant params we need to calculate (https://stackoverflow.com/a/56097764)
+
+# Logic adapted from https://medium.com/@kennethjiang/calibrate-fisheye-lens-using-opencv-part-2-13990f1b157f
 
 # Calibrated to current lens setup
 DIM=(1280, 720)

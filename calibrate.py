@@ -4,6 +4,8 @@ import numpy as np
 import os
 from pathlib import Path
 
+# Logic adapted from https://medium.com/@kennethjiang/calibrate-fisheye-lens-using-opencv-333b05afa0b0
+
 CALIBRATION_DIR = Path(__file__).parent.resolve() / 'fisheye_calibration'
 CHECKERBOARD = (6,9)
 
