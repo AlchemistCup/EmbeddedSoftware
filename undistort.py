@@ -3,6 +3,7 @@ import numpy as np
 import sys
 from pathlib import Path
 import time
+from typing import Tuple
 
 # Calibrated to current lens setup
 DIM=(1280, 720)
@@ -12,21 +13,18 @@ D=np.array([[-0.009176217948661868], [-0.00876731233656425], [0.0065512981736505
 # Attempt to speedup undistortion
 # This is how scaled_K, dim2 and balance are used to determine the final K used to un-distort image.
 new_K = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, DIM, np.eye(3), balance=0.3)
+map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), new_K, DIM, cv2.CV_16SC2) # Bulk of time spent here
 
 def main():
     for p in sys.argv[1:]:
         undistort_and_display(Path(p))
 
 def undistort(img, balance=0.3):
-    dim1 = img.shape[:2][::-1]  #dim1 is the dimension of input image to un-distort    
-
-    
-    map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), new_K, dim1, cv2.CV_16SC2)
     undistorted_img = cv2.remap(img, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 
     # Crop image
     w_crop = 200
-    undistorted_img = undistorted_img[:, w_crop:dim1[0]-w_crop]    
+    undistorted_img = undistorted_img[:, w_crop:DIM[0]-w_crop]    
 
     return undistorted_img    
 
