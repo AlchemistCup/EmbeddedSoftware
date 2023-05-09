@@ -18,7 +18,7 @@ def main():
         start = time.time()
         im = picam2.capture_array() # Can grab frames at around 30FPS
         im = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-        im = undistort(im) # This results in drop to 3 FPS (takes ~300ms to undistort)
+        im = undistort(im) # Optimised undistort, now achieve 10-25FPS (~25ms)
         # Raspberry Pi 4B is ~3x more powerful than 3B+ (current model) + can have more RAM (would recommend 4GB for image processing) => much faster FPS
         end = time.time()
         frame_capture_time = end - start

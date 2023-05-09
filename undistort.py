@@ -3,7 +3,11 @@ import numpy as np
 import sys
 from pathlib import Path
 import time
-from typing import Tuple
+
+# TODO: Refactor this mess
+# class FishEyeCorrector:
+#     def __init__(self, dim: Tuple[int, int], k: np.array, d: np.array):
+#         self._
 
 # Calibrated to current lens setup
 DIM=(1280, 720)
@@ -12,7 +16,8 @@ D=np.array([[-0.009176217948661868], [-0.00876731233656425], [0.0065512981736505
 
 # Attempt to speedup undistortion
 # This is how scaled_K, dim2 and balance are used to determine the final K used to un-distort image.
-new_K = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, DIM, np.eye(3), balance=0.3)
+balance = 0.3
+new_K = cv2.fisheye.estimateNewCameraMatrixForUndistortRectify(K, D, DIM, np.eye(3), balance=balance)
 map1, map2 = cv2.fisheye.initUndistortRectifyMap(K, D, np.eye(3), new_K, DIM, cv2.CV_16SC2) # Bulk of time spent here
 
 def main():
