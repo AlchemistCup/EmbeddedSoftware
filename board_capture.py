@@ -45,7 +45,7 @@ def find_board(img: cv2.Mat):
     def biggest_contour(contours):
         biggest = np.array([])
         max_area = 0
-        for contour in contours:
+        for contour in contours: # Potentially slow loop
             area = cv2.contourArea(contour)
             if area > 50: # Small contour are noise
                 perimeter = cv2.arcLength(contour, True)
@@ -94,21 +94,36 @@ def find_board(img: cv2.Mat):
     
     # Not sure how big the board will be, need to measure size when setup is ready
     # Note that this cropped version is a coloured image of the board!
-    board = isolate_board(img, board_corners, board_length_px = 700)
+    board = isolate_board(img, board_corners, board_length_px = 704)
 
 ##### 4. Board state detection
 def detect_board_state(board_img):
     # Very simple approach, just splits up the image evenly into an 8x8 grid (all squares have the same size so this should be fine) -- REQUIRES BOARD TO ONLY INCLUDE 8x8 squares!!!!
     def segment(board_img):
-        squares = []
-        rows = np.vsplit(board_img, 8)
-        for row in rows:
-            squares.append(np.hsplit(row, 8))
+        assert board_img.shape[0] == board_img.shape[1], f"Board image is not a square, dimensions {board_img.shape}"
+        assert len(board_img.shape) == 2, f"Board image is not 2D (contains multiple channels), dimensions {board_img.shape}"
+
+        n = board_img.shape[0]
+        assert n % 8 == 0, f"Board image dimensions {board_img.shape} is not divisible into 8x8 grid" 
+        subarray_size = n // 8
+        squares = board_img.reshape((8, subarray_size, 8, subarray_size)).transpose((0, 2, 1, 3)).reshape((8, 8, subarray_size, subarray_size))
+
+        # Old approach, should be slower since using python loop
+        # squares = []
+        # rows = np.vsplit(board_img, 8)
+        # for row in rows:
+        #     squares.append(np.hsplit(row, 8))
+        # squares = np.array(squares)
         
         # Check dimensionality of this works out
-        return np.array(squares)
+        return squares
     
     squares = segment(board_img)
+    # Potentially refactor this to be numpy array using ints?
+    # -1 can indicate emptiness
+    # board = np.empty((8, 8), dtype=np.int8)
+    # board = np.array([decode_qr_code(grid[idx]) for idx in np.ndindex(grid.shape[:2])], dtype=np.int8).reshape((8, 8))
+
     board: List[List[Optional[str]]] = [[None] * 8 for _ in range(8)]
     qcd = cv2.QRCodeDetector()
     for idx, square in np.ndenumerate(squares):
