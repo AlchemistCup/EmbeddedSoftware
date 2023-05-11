@@ -8,28 +8,31 @@ from undistort import undistort
 # Number of tiles of the board visible in an image
 BOARD_WIDTH = 8
 BOARD_HEIGHT = 8
+RAW_IMG_DIMS = (1280, 720)
 
 ##### 1. Image capture
 def setup_camera() -> Picamera2:
     picam = Picamera2()
-    # Test whether still or preview configuration works best
-    config = picam.create_preview_configuration()
-    config['main']['size'] = (1280,720)
-    config['main']['format'] = "RGB888" # There does not appear to be a way to capture greyscale images directly, even example docs use cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+
+    config = picam.create_preview_configuration() # Test if still config are better
+    config['main']['size'] = RAW_IMG_DIMS
+    config['main']['format'] = 'YUV420'
     picam.align_configuration(config)
-    print(config)
     picam.configure(config)
     picam.start()
 
     return picam
 
+def capture_img(picam: Picamera2) -> cv2.Mat:
+    """
+    Captures a grayscale image
+    """
+    img = picam.capture_array()
+    return img[:RAW_IMG_DIMS[1], :RAW_IMG_DIMS[0]] # Requires image to be in YUV format
+
 ##### 2. Preprocessing
-# Potentially embed this in the camera event loop by registering this as a pre_callback to the camera - could improve performance as buffer is modified in-place
-# Could also be worse, docs seem to recommend against it lol
-# Better idea: make image grey as part of pre_callback, leave other pre-processing as is
 def preprocess_image(img: cv2.Mat) -> cv2.Mat:
-    img_grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) # Convert to gray - should make all operations more efficient as n of channels are reduced to 1
-    img_undistorted = undistort(img_grey) # Remove fisheye distortion
+    img_undistorted = undistort(img) # Remove fisheye distortion
     img_blur = cv2.GaussianBlur(img_undistorted, (5, 5), 1) # Remove gaussian noise
     img_threshold = cv2.adaptiveThreshold(img_blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, blockSize=11, C=2) # Potentially tweek params
 
@@ -142,7 +145,7 @@ def main():
     picam = setup_camera()
 
     while True:
-        img: cv2.Mat = picam.capture_array()
+        img: cv2.Mat = capture_img(picam)
         board_img: cv2.Mat = find_board(img)
         board_state: List[List[Optional[str]]] = detect_board_state(board_img)
         print(board_state)
