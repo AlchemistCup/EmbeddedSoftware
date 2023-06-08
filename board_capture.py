@@ -142,6 +142,25 @@ def detect_board_state(board_img):
 
     return board
 
+# Used to generate board deltas for capnproto client
+def find_differences(new, old):
+    diff_indices = np.where(new != old)
+    differing_values = new[diff_indices]
+    row_indices, col_indices = diff_indices
+
+    differences = [
+        {
+            'value': value,
+            'pos': {
+                'row': row,
+                'col': col
+            }
+        }
+        for value, row, col in zip(differing_values, row_indices, col_indices)
+    ]
+
+    return differences
+
 def main():
     picam = setup_camera()
 
