@@ -3,7 +3,7 @@ import cv2
 from pathlib import Path
 
 from utils import find_starting_id
-from board_capture import setup_camera, preprocess_image, setup_camera_gray
+from board_capture import setup_camera, preprocess_image
 
 TEST_DIR = Path(__file__).parent.resolve() / 'test_img'
 

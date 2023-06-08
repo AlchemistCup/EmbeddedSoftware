@@ -6,6 +6,9 @@
 
 - Raspberry Pi 4B is ~3x more powerful than 3B+ (current model) + can have more RAM (would recommend 4GB for image processing) => much faster FPS
 
+- Try pypy3 (JIT compiled) vs python
+    - Or cppyy for native cpp bindings to python
+
 ### Improvements
 - Sped up grayscale conversion using different image format (taking advantage of specialised hardware) => 2.4x performance boost - (see [here](https://github.com/raspberrypi/picamera2/issues/698))
 - Updated board square segmentation to use numpy operations rather than python for loops (need to actually test if this is faster)

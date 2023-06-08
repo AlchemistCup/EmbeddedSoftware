@@ -2,6 +2,7 @@ from picamera2 import Picamera2
 import cv2
 import numpy as np
 from typing import List, Optional
+from sys import getsizeof
 
 from undistort import undistort
 
@@ -56,7 +57,6 @@ def find_board(img: cv2.Mat):
                 if area > max_area and len(approx) == 4:
                     biggest = approx
                     max_area = area
-
         return biggest, max_area
     
     board_corners, _ = biggest_contour(contours)
@@ -84,7 +84,7 @@ def find_board(img: cv2.Mat):
         
         board_corners = reorder(board_corners)
         original_pts = np.float32(board_corners)
-        target_pts = np.float32([0, 0], [board_length_px, 0], [0, board_length_px], [board_length_px, board_length_px])
+        target_pts = np.float32([[0, 0], [board_length_px, 0], [0, board_length_px], [board_length_px, board_length_px]])
         matrix = cv2.getPerspectiveTransform(original_pts, target_pts)
 
         board_img = cv2.warpPerspective(img, matrix, (board_length_px, board_length_px))
@@ -98,6 +98,7 @@ def find_board(img: cv2.Mat):
     # Not sure how big the board will be, need to measure size when setup is ready
     # Note that this cropped version is a coloured image of the board!
     board = isolate_board(img, board_corners, board_length_px = 704)
+    return board
 
 ##### 4. Board state detection
 def detect_board_state(board_img):
